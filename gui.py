@@ -36,9 +36,9 @@ def gui():
 	two = Frame(notebook)
 	three = Frame(notebook) 
 
-	notebook.add(one, text = "Tab 1")
-	notebook.add(two, text = "Tab 2")
-	notebook.add(three, text = "Tab 3")
+	notebook.add(one, text = "Procss Scheduler")
+	notebook.add(two, text = "Memory Management Unit")
+	notebook.add(three, text = "Page Replacement")
 	notebook.pack(side=TOP)
 	random.seed()
 	return root, one, two, three
@@ -93,8 +93,6 @@ def frame3():
 	var = string1[0].get()
 	return string1, string2
 
-
-
 N = 5
 M = 6
 
@@ -102,6 +100,5 @@ root,one,two,three = gui()
 frame1()
 bcan, can = frame2()
 string1, string2 = frame3()
-
 
 root.mainloop()
