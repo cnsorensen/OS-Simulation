@@ -13,6 +13,6 @@ Required elements:
     Simulation of the page replacement algorithms FIFO, Optimal, LRU, LFU, NRU. 
         Use auto-generated reference strings.
         The user will select the algorithm, number of frames, and reference string details.  
-        Output page faults.
+    Output page faults.
     Cross platform GUI interface. 
 
