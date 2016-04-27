@@ -72,6 +72,10 @@ def frame2():
     return b, can
 
 # Page Replacement tab
+# FIFO, Optimal, LRU, LFU, NRU
+# Use Auto-generated reference strings
+# The user will select the algorithm, number of frames, and reference string deets
+# Output page faults
 def frame3():
     top = Frame( three )
     top.pack( side = TOP )
@@ -80,6 +84,31 @@ def frame3():
     cmds = Frame( three )
     cmds.pack( side = TOP )
 
+    string1 = ""
+    string2 = ""
+
+    pr_algorithms = [
+        ( "FIFO", "FIFO" ),
+        ( "Optimal", "Optimal" ),
+        ( "LRU", "LRU" ),
+        ( "LFU", "LFU" ),
+        ( "NRU", "NRU" )
+    ]
+
+    # radio buttons to select the page replacement algorithm
+    pr_alg = StringVar()
+    # initalize it
+    pr_alg.set("FIFO")
+    # add each button
+    for text, mode in pr_algorithms:
+        pr_alg_b = Radiobutton( top, text = text, variable = pr_alg, value = mode )
+        pr_alg_b.pack( side = LEFT )
+
+    # generate button to submit the page replacement information
+    generate_b = Button( three, text = "Generate", command = test )
+    generate_b.pack()
+
+    '''
     string1 = []
     entry1 = []
     for i in range( M ): 
@@ -102,7 +131,7 @@ def frame3():
 
     b3 = Button( cmds, text = "Random", command = randvar )
     b3.pack( side = LEFT )
-    var = string1[0].get()
+    var = string1[0].get()'''
     return string1, string2
 
 if __name__ == "__main__":
