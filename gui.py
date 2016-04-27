@@ -108,6 +108,7 @@ def frame3():
     generate_b = Button( three, text = "Generate", command = test )
     generate_b.pack()
 
+
     '''
     string1 = []
     entry1 = []
