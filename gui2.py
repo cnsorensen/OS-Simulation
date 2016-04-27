@@ -5,11 +5,6 @@ import random
 def test():
     print 'Hello mother fucking world!!!'
 
-def pr_generate():
-    print 'Page Replacement in da hizzhowwwss'
-    canline = pr_canvas.create_line( 0, 0, 200, 100 )
-    canbox = pr_canvas.create_rectangle( ( 150, 150, 250, 250 ) )
-
 def printvar( var ):
     print var[0].get()
 
@@ -20,7 +15,7 @@ def pushvar( var ):
 
 # Creates a line
 def line():
-	canline = can.create_line( 0, 0, 250, 250, 53, 69, 300, 300 )
+	canline = can.create_line( 0, 0, 200, 100 )
 	canbox = can.create_rectangle( ( 150, 150, 250, 250 ) )
 	bcan.config( text = "Hide", command = hide )
 
@@ -110,12 +105,9 @@ def frame3():
         pr_alg_b.pack( side = LEFT )
 
     # generate button to submit the page replacement information
-    pr_generate_b = Button( three, text = "Generate", command = pr_generate )
-    pr_generate_b.pack()
+    generate_b = Button( three, text = "Generate", command = test )
+    generate_b.pack()
 
-    # the canvas where the page replacement results will be laid
-    pr_canvas = Canvas( three, width = 500, height = 500 )
-    pr_canvas.pack()
 
     '''
     string1 = []
@@ -141,7 +133,7 @@ def frame3():
     b3 = Button( cmds, text = "Random", command = randvar )
     b3.pack( side = LEFT )
     var = string1[0].get()'''
-    return pr_generate_b, pr_canvas
+    return string1, string2
 
 if __name__ == "__main__":
     N = 5
@@ -150,6 +142,6 @@ if __name__ == "__main__":
     root,one,two,three = gui()
     frame1()
     bcan, can = frame2()
-    pr_generate_b, pr_canvas = frame3()
+    string1, string2 = frame3()
 
     root.mainloop()
