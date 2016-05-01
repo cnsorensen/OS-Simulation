@@ -84,6 +84,53 @@ def draw_pr_fifo( num_frames, num_refs, ref_string ):
             y2_1 = y2_1 + 1
             y2_2 = y2_2 + 1
 
+    ## fill in the boxes ##
+    
+    # The y positions for the pages
+    # Position 0 is the ref that's currently being processed
+    # Position num_frames + 2 will hold the position for the page fault notification
+    # These values will stay throughout the process
+    y_pos = {}
+    y_pos[0] = width / 2
+    for frame in range( 1, num_frames + 2, 1 ):
+        y_pos[frame] = y_pos[frame-1] + width
+    print y_pos
+
+    # hold the values of the pages
+    # initialize to all -1's for empty
+    page_table = {}
+    for i in range( 0, num_frames, 1 ):
+        page_table[i] = -1
+    print page_table
+
+    # the x position for the text
+    x_pos = 1 * width + width / 2
+
+    # go through the ref string
+    for val in ref_string:
+        print 'Whats up ' + str(val)
+        print 'Page table:'
+        print page_table
+        # go through the page table
+        for i in range( 0, num_frames, 1 ):
+            # if the value is already there, continue
+            if page_table[i] == val:
+                print 'match ' + str(val)
+                break
+            # if there is an empty spot, insert and continue
+            if page_table[i] == -1:
+                print 'insert ' + str(val)
+                page_table[i] = val
+                break
+        # print the current page table to the display
+        # print the ref val on the top
+        cantext = pr_canvas.create_text( x_pos, y_pos[0], text = str( val ) )
+        for fuck in range( 0, len( page_table ), 1 ):
+            if page_table[fuck] != -1:
+                cantext = pr_canvas.create_text( x_pos, y_pos[fuck+1], text = str( page_table[fuck] ) )
+        # increment the x position
+        x_pos = x_pos + 2 * width
+
 def printvar( var ):
     print var[0].get()
 
