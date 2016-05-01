@@ -5,10 +5,42 @@ import random
 def test():
     print 'Hello mother fucking world!!!'
 
-def pr_generate():
+def pr_generate( pr_alg, num_frames ):
     print 'Page Replacement in da hizzhowwwss'
+    print pr_alg
+    print num_frames
+
+    # the range of the references
+    range_min = 0
+    range_max = 5
+
+    # the number of references
+    num_refs = 5
+
+    # holds the reference string
+    ref_string = []
+
+    # generate the random reference string with the range of
+    # values and the number of references
+    ref_string = generate_ref_string( range_min, range_max, num_refs )
+
+    print ref_string
+
     canline = pr_canvas.create_line( 0, 0, 200, 100 )
     canbox = pr_canvas.create_rectangle( ( 150, 150, 250, 250 ) )
+
+def generate_ref_string( range_min, range_max, num ):
+    
+    # holds the string of random numbers
+    ref_string = []
+
+    # generate num number of random number and add to the ref string list
+    for i in range( 0, num, 1 ):
+        j = random.randint( range_min, range_max )
+        ref_string.append( j )
+
+    # return that list of random numbers
+    return ref_string
 
 def printvar( var ):
     print var[0].get()
@@ -66,7 +98,6 @@ def frame1():
     clear_b.pack()
     generate_b = Button( one, text = "Generate", command = test )
     generate_b.pack()
-    ##Add radio buttons to select a scheduler type
 
 # Memory Management Unit tab
 def frame2():
@@ -100,34 +131,62 @@ def frame3():
         ( "NRU", "NRU" )
     ]
 
+    num_frames_selections = [
+        ( "1", 1 ),
+        ( "2", 2 ),
+        ( "3", 3 ),
+        ( "4", 4 ),
+        ( "5", 5 )
+    ]
+
+    # label for the page replacement algorithm selection
+    pr_alg_L = Label( top, text = 'Page Replacement Algorithm' )
+    pr_alg_L.pack()
+
     # radio buttons to select the page replacement algorithm
     pr_alg = StringVar()
     # initalize it
     pr_alg.set("FIFO")
-    # add each button
+    # add each button to the display
     for text, mode in pr_algorithms:
         pr_alg_b = Radiobutton( top, text = text, variable = pr_alg, value = mode )
         pr_alg_b.pack( side = LEFT )
 
-    # get the number of frames from the user
-    num_frames = StringVar()
-    num_frames_e = Entry( three, width = 20, textvariable = num_frames )
-    num_frames_e.pack()
 
+    # label for the number of frames selection
+    num_frames_L = Label( bottom, text = 'Number of Page Frames:' )
+    num_frames_L.pack()
+
+    # radio buttons to select the number of frames
+    num_frames = IntVar()
+    # initalize it
+    num_frames.set( "3" )
+    # add each button to the display
+    for text, mode in num_frames_selections:
+        num_frames_b = Radiobutton( bottom, text = text, variable = num_frames, value = mode )
+        num_frames_b.pack( side = LEFT )
+
+    # get the number of frames from the user
+    ##num_frames = StringVar()
+    ##num_frames_e = Entry( three, width = 20, textvariable = num_frames )
+    ##num_frames_e.pack()
 
     # generate button to submit the page replacement information
-    pr_generate_b = Button( three, text = "Generate", command = pr_generate )
+    pr_generate_b = Button( three, text = "Generate", command = lambda: pr_generate( pr_alg.get(), num_frames.get() ) )
     pr_generate_b.pack()
 
     # the canvas where the page replacement results will be laid
     pr_canvas = Canvas( three, width = 500, height = 500 )
     pr_canvas.pack()
 
+
     return pr_generate_b, pr_canvas
 
 if __name__ == "__main__":
     N = 5
     M = 6
+
+    pr_alg = "DOG"
 
     root,one,two,three = gui()
     frame1()
