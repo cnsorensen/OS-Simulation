@@ -1,21 +1,19 @@
 from Tkinter import *
 from ttk import *
 import random
+import time
 
 def test():
     print 'Hello mother fucking world!!!'
 
-def pr_generate( pr_alg, num_frames ):
+def pr_generate( pr_alg, num_frames, num_refs ):
     print 'Page Replacement in da hizzhowwwss'
     print pr_alg
     print num_frames
 
-    # the range of the references
+    # the range of the values of references
     range_min = 0
     range_max = 5
-
-    # the number of references
-    num_refs = 5
 
     # holds the reference string
     ref_string = []
@@ -26,8 +24,11 @@ def pr_generate( pr_alg, num_frames ):
 
     print ref_string
 
-    canline = pr_canvas.create_line( 0, 0, 200, 100 )
-    canbox = pr_canvas.create_rectangle( ( 150, 150, 250, 250 ) )
+    if pr_alg == "FIFO":
+        draw_pr_fifo( num_frames, num_refs, ref_string )
+
+#    canline = pr_canvas.create_line( 0, 0, 300, 0 )
+    #canbox = pr_canvas.create_rectangle( ( 150, 150, 250, 250 ) )
 
 def generate_ref_string( range_min, range_max, num ):
     
@@ -41,6 +42,47 @@ def generate_ref_string( range_min, range_max, num ):
 
     # return that list of random numbers
     return ref_string
+
+def draw_pr_fifo( num_frames, num_refs, ref_string ):
+    print "Drawing fifo"
+
+    ## draw the pages out first ##
+
+    # height and width of each page
+    # dynamically based off of the number of refs, including spaces
+    #   inbetween, and on the width of the window = 500
+    width = 500 / ( num_refs * 2 + 1 )
+    print width
+    print num_frames
+    print num_refs
+    print ref_string
+
+
+    # for indexing how far away from the left side times width
+    x1_1 = 1
+    x1_2 = 2
+
+    # create the outside of the entire page table
+    for ref in range( 0, num_refs, 1 ):
+        canbox = pr_canvas.create_rectangle( x1_1 * width, width, x1_2 * width, 
+                num_frames * width + width )
+
+        # set the variables to draw the inner pages
+        x2_1 = x1_1 * width
+        x2_2 = x1_2 * width
+        y2_1 = 1
+        y2_2 = 2
+
+        # adjust the x values for the next reference outline AFTER you 
+        # used them to set the variables to draw the inner pages
+        x1_1 = x1_1 + 2
+        x1_2 = x1_2 + 2
+
+        # draw the inner pages
+        for frame in range( 0, num_frames, 1 ):
+            canbox = pr_canvas.create_rectangle( x2_1, y2_1 * width, x2_2, y2_2 * width )
+            y2_1 = y2_1 + 1
+            y2_2 = y2_2 + 1
 
 def printvar( var ):
     print var[0].get()
@@ -70,7 +112,7 @@ def gui():
     # title of the window
     root.title( "Simulation Project" )
     # set the size of the window
-    root.geometry( "500x300" )
+    root.geometry( "900x500" )
     # set up the tab structure
     notebook = Notebook( root )
 
@@ -79,11 +121,15 @@ def gui():
     two = Frame( notebook )
     three = Frame( notebook ) 
 
+    # label the tabs
     notebook.add( one, text = "Procss Scheduler" )
     notebook.add( two, text = "Memory Management Unit" )
     notebook.add( three, text = "Page Replacement" )
     notebook.pack( side = TOP )
+
+    # the seeder for the randomizer
     random.seed()
+
     return root, one, two, three
 
 # Process Scheduler tab
@@ -115,14 +161,19 @@ def frame2():
 def frame3():
     top = Frame( three )
     top.pack( side = TOP )
+    middle = Frame( three )
+    middle.pack( side = TOP )
     bottom = Frame( three )
     bottom.pack( side = TOP )
+
+    ##OLD
     cmds = Frame( three )
     cmds.pack( side = TOP )
-
     string1 = ""
     string2 = ""
+    ##
 
+    # Values for the radio buttons
     pr_algorithms = [
         ( "FIFO", "FIFO" ),
         ( "Optimal", "Optimal" ),
@@ -137,6 +188,15 @@ def frame3():
         ( "3", 3 ),
         ( "4", 4 ),
         ( "5", 5 )
+    ]
+
+    num_refs_selections = [
+        ( "5", 5 ),
+        ( "6", 6 ),
+        ( "7", 7 ),
+        ( "8", 8 ),
+        ( "9", 9 ),
+        ( "10", 10 )
     ]
 
     # label for the page replacement algorithm selection
@@ -154,7 +214,7 @@ def frame3():
 
 
     # label for the number of frames selection
-    num_frames_L = Label( bottom, text = 'Number of Page Frames:' )
+    num_frames_L = Label( middle, text = 'Number of Page Frames:' )
     num_frames_L.pack()
 
     # radio buttons to select the number of frames
@@ -163,16 +223,26 @@ def frame3():
     num_frames.set( "3" )
     # add each button to the display
     for text, mode in num_frames_selections:
-        num_frames_b = Radiobutton( bottom, text = text, variable = num_frames, value = mode )
+        num_frames_b = Radiobutton( middle, text = text, variable = num_frames, value = mode )
         num_frames_b.pack( side = LEFT )
 
-    # get the number of frames from the user
-    ##num_frames = StringVar()
-    ##num_frames_e = Entry( three, width = 20, textvariable = num_frames )
-    ##num_frames_e.pack()
+    # label for the number of references selection
+    num_refs_L = Label( bottom, text = 'Number of References:' )
+    num_refs_L.pack()
+
+    # radio buttons to select the number of references
+    num_refs = IntVar()
+    #initalize it
+    num_refs.set( "7" )
+    # add each button to the display
+    for text, mode in num_refs_selections:
+        num_refs_b = Radiobutton( bottom, text = text, variable = num_refs, value = mode )
+        num_refs_b.pack( side = LEFT )
+
 
     # generate button to submit the page replacement information
-    pr_generate_b = Button( three, text = "Generate", command = lambda: pr_generate( pr_alg.get(), num_frames.get() ) )
+    pr_generate_b = Button( three, text = "Generate", 
+        command = lambda: pr_generate( pr_alg.get(), num_frames.get(), num_refs.get() ) )
     pr_generate_b.pack()
 
     # the canvas where the page replacement results will be laid
