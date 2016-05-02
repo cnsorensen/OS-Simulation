@@ -7,9 +7,7 @@ def test():
     print 'Hello mother fucking world!!!'
 
 def pr_generate( pr_alg, num_frames, num_refs ):
-    print 'Page Replacement in da hizzhowwwss'
-    print pr_alg
-    print num_frames
+    print 'Page Replacement'
 
     # the range of the values of references
     range_min = 0
@@ -22,6 +20,7 @@ def pr_generate( pr_alg, num_frames, num_refs ):
     # values and the number of references
     ref_string = generate_ref_string( range_min, range_max, num_refs )
 
+    print 'Ref string:'
     print ref_string
 
     if pr_alg == "FIFO":
@@ -51,11 +50,6 @@ def draw_pr_fifo( num_frames, num_refs, ref_string ):
     # dynamically based off of the number of refs, including spaces
     #   inbetween, and on the width of the window = 500
     width = 500 / ( num_refs * 2 + 1 )
-    print width
-    print num_frames
-    print num_refs
-    print ref_string
-
 
     # for indexing how far away from the left side times width
     x1_1 = 1
@@ -93,29 +87,22 @@ def draw_pr_fifo( num_frames, num_refs, ref_string ):
     y_pos[0] = width / 2
     for frame in range( 1, num_frames + 2, 1 ):
         y_pos[frame] = y_pos[frame-1] + width
-    print 'Y pos:'
-    print y_pos
 
     # hold the values of the pages
     # initialize to all -1's for empty
     page_table = {}
     for i in range( 0, num_frames, 1 ):
         page_table[i] = -1
-    print 'Page table:'
-    print page_table
 
     page_time = {}
     for i in range( 0, num_frames, 1 ):
         page_time[i] = -1
-    print 'Page time:'
-    print page_time
 
     # the x position for the text
     x_pos = 1 * width + width / 2
 
     # go through the ref string
     for val in ref_string:
-        print 'Whats up ' + str(val)
         print 'Current page table:'
         print page_table
 
@@ -126,12 +113,10 @@ def draw_pr_fifo( num_frames, num_refs, ref_string ):
         for i in range( 0, num_frames, 1 ):
             # if the value is already there, continue
             if page_table[i] == val:
-                print 'match ' + str(val)
                 fault_flag = False
                 break
             # if there is an empty spot, insert and continue
             elif page_table[i] == -1:
-                print 'insert ' + str(val)
                 page_table[i] = val
                 # start it at 0, it will be incremented to 1 soon
                 page_time[i] = 0
@@ -181,11 +166,6 @@ def draw_pr_optimal( num_frames, num_refs, ref_string ):
     # dynamically based off of the number of refs, including spaces
     #   inbetween, and on the width of the window = 500
     width = 500 / ( num_refs * 2 + 1 )
-    print width
-    print num_frames
-    print num_refs
-    print ref_string
-
 
     # for indexing how far away from the left side times width
     x1_1 = 1
@@ -223,33 +203,28 @@ def draw_pr_optimal( num_frames, num_refs, ref_string ):
     y_pos[0] = width / 2
     for frame in range( 1, num_frames + 2, 1 ):
         y_pos[frame] = y_pos[frame-1] + width
-    print 'Y pos:'
-    print y_pos
 
     # hold the values of the pages
     # initialize to all -1's for empty
     page_table = {}
     for i in range( 0, num_frames, 1 ):
         page_table[i] = -1
-    print 'Page table:'
-    print page_table
 
-    page_time = {}
+    # holds the distances of the values in the table
+    page_dist = {}
     for i in range( 0, num_frames, 1 ):
-        page_time[i] = -1
-    print 'Page time:'
-    print page_time
+        page_dist[i] = -1
 
     # the x position for the text
     x_pos = 1 * width + width / 2
 
     # create the string of distances for each of the refs
-    dist_refs = []
+    max_dist = num_refs * 2
+    dist_refs = {}
     dist_refs = get_distances( num_refs, ref_string )
 
     # go through the ref string
-    for val in ref_string:
-        print 'Whats up ' + str(val)
+    for val in range( 0, num_refs, 1):
         print 'Current page table:'
         print page_table
 
@@ -259,42 +234,45 @@ def draw_pr_optimal( num_frames, num_refs, ref_string ):
         # go through the page table and look for insert or match
         for i in range( 0, num_frames, 1 ):
             # if the value is already there, continue
-            if page_table[i] == val:
-                print 'match ' + str(val)
+            if page_table[i] == ref_string[val]:
+                # update the page distances
+                page_dist[i] = dist_refs[val]
                 fault_flag = False
                 break
             # if there is an empty spot, insert and continue
             elif page_table[i] == -1:
-                print 'insert ' + str(val)
-                page_table[i] = val
+                page_table[i] = ref_string[val]
                 # start it at 0, it will be incremented to 1 soon
-                page_time[i] = 0
+                page_dist[i] = dist_refs[val]
                 fault_flag = False
                 break
 
-        # increment the time of all of the values in the page table
+        # decrement the distance of all of the values in the page table
         for i in range( 0, num_frames, 1 ):
+            # increment that ones that aren't coming back
+            if page_dist[i] >= max_dist:
+                page_dist[i] = page_dist[i] + 1
             # skip the empty ones
-            if page_table[i] != -1:
-                page_time[i] = page_time[i] + 1
+            elif page_dist[i] != -1:
+                page_dist[i] = page_dist[i] - 1
             
         # if there is a page fault, replace the value that was first in
         # find which value was first in
         if fault_flag == True:
-            max_time = -1
+            max_dist = -1
             max_index = -1
             for i in range( 0, num_frames, 1 ):
-                if page_time[i] > max_time:
-                    max_time = page_time[i]
+                if page_dist[i] > max_dist:
+                    max_dist = page_dist[i]
                     max_index = i
 
             # replace it
-            page_time[max_index] = 1
-            page_table[max_index] = val
+            page_dist[max_index] = dist_refs[val]
+            page_table[max_index] = ref_string[val]
             
         # print the current page table to the display
         # print the ref val on the top
-        cantext = pr_canvas.create_text( x_pos, y_pos[0], text = str( val ) )
+        cantext = pr_canvas.create_text( x_pos, y_pos[0], text = str( ref_string[val] ) )
         for fuck in range( 0, len( page_table ), 1 ):
             if page_table[fuck] != -1:
                 cantext = pr_canvas.create_text( x_pos, y_pos[fuck+1], text = str( page_table[fuck] ) )
@@ -308,7 +286,7 @@ def draw_pr_optimal( num_frames, num_refs, ref_string ):
 
 def get_distances( num_refs, refs_string ):
     # hold the distances for each ref to their next occurance
-    dist_refs = []
+    dist_refs = {}
 
     # the max is double the number of refs for safety.
     # the values are going to be decremented so it prevents from
@@ -326,21 +304,23 @@ def get_distances( num_refs, refs_string ):
     found_flag = False
     # go through each of the refs
     for i in range( 0, num_refs, 1 ):
-        curr = refs_string[i]
+        curr_ref = refs_string[i]
         dist = 0
         # go through the rest of the refs following the current one
-        for j in range( i, num_refs, 1 ):
+        for j in range( i + 1, num_refs, 1 ):
             # if there is another occurance, note the distance and continue
             # to the next ref
-            if refs_string[j] == cur:
-                dist_refs[i] = count
+            if refs_string[j] == curr_ref:
+                dist_refs[i] = dist
                 found_flag = True
                 break
             dist = dist + 1   
         # if there isn't another occurance, set it to the max dist
-        if found_flag = False:
+        if found_flag == False:
             dist_refs[i] = max_dist
 
+    # return the list of distance for references
+    return dist_refs
 
 def printvar( var ):
     print var[0].get()
