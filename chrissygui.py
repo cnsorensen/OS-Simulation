@@ -26,11 +26,8 @@ def pr_generate( pr_alg, num_frames, num_refs ):
 
     if pr_alg == "FIFO":
         draw_pr_fifo( num_frames, num_refs, ref_string )
-	elif pr_alg == "Optimal":
-		draw_pr_optimal( num_frames, num_refs, ref_string )
-
-#    canline = pr_canvas.create_line( 0, 0, 300, 0 )
-    #canbox = pr_canvas.create_rectangle( ( 150, 150, 250, 250 ) )
+    elif pr_alg == "Optimal":
+        draw_pr_optimal( num_frames, num_refs, ref_string )
 
 def generate_ref_string( range_min, range_max, num ):
     
@@ -246,6 +243,10 @@ def draw_pr_optimal( num_frames, num_refs, ref_string ):
     # the x position for the text
     x_pos = 1 * width + width / 2
 
+    # create the string of distances for each of the refs
+    dist_refs = []
+    dist_refs = get_distances( num_refs, ref_string )
+
     # go through the ref string
     for val in ref_string:
         print 'Whats up ' + str(val)
@@ -304,6 +305,42 @@ def draw_pr_optimal( num_frames, num_refs, ref_string ):
 
         # increment the x position
         x_pos = x_pos + 2 * width
+
+def get_distances( num_refs, refs_string ):
+    # hold the distances for each ref to their next occurance
+    dist_refs = []
+
+    # the max is double the number of refs for safety.
+    # the values are going to be decremented so it prevents from
+    # it becoming too small
+    max_dist = num_refs * 2
+
+    # initialize the array of distances to the max dist
+    for i in range( 0, num_refs, 1 ):
+        dist_refs[i] = max_dist 
+
+    # find the distances
+    # the current value in the ref string
+    curr = -1
+    # The flag for if the value is found in the rest of the string
+    found_flag = False
+    # go through each of the refs
+    for i in range( 0, num_refs, 1 ):
+        curr = refs_string[i]
+        dist = 0
+        # go through the rest of the refs following the current one
+        for j in range( i, num_refs, 1 ):
+            # if there is another occurance, note the distance and continue
+            # to the next ref
+            if refs_string[j] == cur:
+                dist_refs[i] = count
+                found_flag = True
+                break
+            dist = dist + 1   
+        # if there isn't another occurance, set it to the max dist
+        if found_flag = False:
+            dist_refs[i] = max_dist
+
 
 def printvar( var ):
     print var[0].get()
@@ -469,7 +506,6 @@ def frame3():
     # the canvas where the page replacement results will be laid
     pr_canvas = Canvas( three, width = 500, height = 500 )
     pr_canvas.pack()
-
 
     return pr_generate_b, pr_canvas
 
