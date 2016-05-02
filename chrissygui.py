@@ -27,6 +27,8 @@ def pr_generate( pr_alg, num_frames, num_refs ):
         draw_pr_fifo( num_frames, num_refs, ref_string )
     elif pr_alg == "Optimal":
         draw_pr_optimal( num_frames, num_refs, ref_string )
+    elif pr_alg == "LRU":
+        draw_pr_lru( num_frames, num_refs, ref_string )
 
 def generate_ref_string( range_min, range_max, num ):
     
@@ -41,6 +43,7 @@ def generate_ref_string( range_min, range_max, num ):
     # return that list of random numbers
     return ref_string
 
+###################################### FIFO #############################################
 def draw_pr_fifo( num_frames, num_refs, ref_string ):
     print "Drawing fifo"
 
@@ -94,6 +97,7 @@ def draw_pr_fifo( num_frames, num_refs, ref_string ):
     for i in range( 0, num_frames, 1 ):
         page_table[i] = -1
 
+    # holds how long the value has been in the table
     page_time = {}
     for i in range( 0, num_frames, 1 ):
         page_time[i] = -1
@@ -157,6 +161,7 @@ def draw_pr_fifo( num_frames, num_refs, ref_string ):
         # increment the x position
         x_pos = x_pos + 2 * width
 
+#################################### OPTIMAL #############################################
 def draw_pr_optimal( num_frames, num_refs, ref_string ):
     print "Drawing optimal"
 
@@ -321,6 +326,127 @@ def get_distances( num_refs, refs_string ):
 
     # return the list of distance for references
     return dist_refs
+
+######################################### LRU ##########################################
+def draw_pr_lru( num_frames, num_refs, ref_string ):
+    print "Drawing LRU"
+
+    ## draw the pages out first ##
+
+    # height and width of each page
+    # dynamically based off of the number of refs, including spaces
+    #   inbetween, and on the width of the window = 500
+    width = 500 / ( num_refs * 2 + 1 )
+
+    # for indexing how far away from the left side times width
+    x1_1 = 1
+    x1_2 = 2
+
+    # create the outside of the entire page table
+    for ref in range( 0, num_refs, 1 ):
+        canbox = pr_canvas.create_rectangle( x1_1 * width, width, x1_2 * width, 
+                num_frames * width + width )
+
+        # set the variables to draw the inner pages
+        x2_1 = x1_1 * width
+        x2_2 = x1_2 * width
+        y2_1 = 1
+        y2_2 = 2
+
+        # adjust the x values for the next reference outline AFTER you 
+        # used them to set the variables to draw the inner pages
+        x1_1 = x1_1 + 2
+        x1_2 = x1_2 + 2
+
+        # draw the inner pages
+        for frame in range( 0, num_frames, 1 ):
+            canbox = pr_canvas.create_rectangle( x2_1, y2_1 * width, x2_2, y2_2 * width )
+            y2_1 = y2_1 + 1
+            y2_2 = y2_2 + 1
+
+    ## fill in the boxes ##
+    
+    # The y positions for the pages
+    # Position 0 is the ref that's currently being processed
+    # Position num_frames + 2 will hold the position for the page fault notification
+    # These values will stay throughout the process
+    y_pos = {}
+    y_pos[0] = width / 2
+    for frame in range( 1, num_frames + 2, 1 ):
+        y_pos[frame] = y_pos[frame-1] + width
+
+    # hold the values of the pages
+    # initialize to all -1's for empty
+    page_table = {}
+    for i in range( 0, num_frames, 1 ):
+        page_table[i] = -1
+
+    # Holds how long the value has been in the table
+    page_time = {}
+    for i in range( 0, num_frames, 1 ):
+        page_time[i] = -1
+
+    # the x position for the text
+    x_pos = 1 * width + width / 2
+
+    # go through the ref string
+    for val in ref_string:
+        print 'Current page table:'
+        print page_table
+
+        # initalize the fault flag to true
+        fault_flag = True
+
+        # go through the page table and look for insert or match
+        for i in range( 0, num_frames, 1 ):
+            # if the value is already there, continue
+            if page_table[i] == val:
+                fault_flag = False
+                # reset the timer
+                page_time[i] = 0
+                break
+            # if there is an empty spot, insert and continue
+            elif page_table[i] == -1:
+                page_table[i] = val
+                # start it at 0, it will be incremented to 1 soon
+                page_time[i] = 0
+                fault_flag = False
+                break
+
+        # increment the time of all of the values in the page table
+        for i in range( 0, num_frames, 1 ):
+            # skip the empty ones
+            if page_table[i] != -1:
+                page_time[i] = page_time[i] + 1
+            
+        # if there is a page fault, replace the value that was first in
+        # find which value was first in
+        if fault_flag == True:
+            max_time = -1
+            max_index = -1
+            for i in range( 0, num_frames, 1 ):
+                if page_time[i] > max_time:
+                    max_time = page_time[i]
+                    max_index = i
+
+            # replace it
+            page_time[max_index] = 1
+            page_table[max_index] = val
+            
+        # print the current page table to the display
+        # print the ref val on the top
+        cantext = pr_canvas.create_text( x_pos, y_pos[0], text = str( val ) )
+        for fuck in range( 0, len( page_table ), 1 ):
+            if page_table[fuck] != -1:
+                cantext = pr_canvas.create_text( x_pos, y_pos[fuck+1], text = str( page_table[fuck] ) )
+        
+        # if there was a page fault, write it at the bottom of the page table
+        if fault_flag == True:
+            cantext = pr_canvas.create_text( x_pos, y_pos[len( page_table ) + 1], text ="PF" )
+
+        # increment the x position
+        x_pos = x_pos + 2 * width
+
 
 def printvar( var ):
     print var[0].get()
