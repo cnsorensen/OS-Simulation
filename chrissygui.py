@@ -392,6 +392,13 @@ def draw_pr_lru( num_frames, num_refs, ref_string ):
     for i in range( 0, num_frames, 1 ):
         page_time[i] = -1
 
+    # Holds the time when the value was inserted
+    page_insert_time = {}
+    for i in range( 0, num_frames, 1 ):
+        page_insert_time[i] = -1
+    insert_time = 0
+    
+
     # the x position for the text
     x_pos = 1 * width + width / 2
 
@@ -399,6 +406,9 @@ def draw_pr_lru( num_frames, num_refs, ref_string ):
     for val in ref_string:
         print 'Current page table:'
         print page_table
+
+        # update the time
+        insert_time = insert_time + 1
 
         # initalize the fault flag to true
         fault_flag = True
@@ -417,6 +427,8 @@ def draw_pr_lru( num_frames, num_refs, ref_string ):
                 # start it at 0, it will be incremented to 1 soon
                 page_time[i] = 0
                 fault_flag = False
+                # set the time that it was inserted
+                page_insert_time[i] = insert_time
                 break
 
         # increment the time of all of the values in the page table
@@ -425,20 +437,26 @@ def draw_pr_lru( num_frames, num_refs, ref_string ):
             if page_table[i] != -1:
                 page_time[i] = page_time[i] + 1
             
-        # if there is a page fault, replace the value that was first in
-        # find which value was first in
+        # if there is a page fault, replace the value was least recently used
         if fault_flag == True:
             max_time = -1
             max_index = -1
+            # used for FIFO within the algorithm
+            min_insert_time = num_refs * 2
             for i in range( 0, num_frames, 1 ):
+                # if it's the least recently used
                 if page_time[i] > max_time:
-                    max_time = page_time[i]
-                    max_index = i
+                    # but it's also the first one of that least recently used value
+                    if page_insert_time[i] < min_insert_time:
+                        max_time = page_time[i]
+                        max_index = i
+                        min_insert_time = page_insert_time[i]
 
             # replace it
             page_time[max_index] = 1
             page_table[max_index] = val
-            
+            page_insert_time[max_index] = insert_time
+
         # print the current page table to the display
         # print the ref val on the top
         cantext = pr_canvas.create_text( x_pos, y_pos[0], text = str( val ) )
@@ -512,6 +530,12 @@ def draw_pr_lfu( num_frames, num_refs, ref_string ):
     for i in range( 0, num_frames, 1 ):
         page_freq[i] = -1
 
+    # Holds the time when the value was inserted
+    page_insert_time = {}
+    for i in range( 0, num_frames, 1 ):
+        page_insert_time[i] = -1
+    insert_time = 0
+
     # the x position for the text
     x_pos = 1 * width + width / 2
 
@@ -519,6 +543,9 @@ def draw_pr_lfu( num_frames, num_refs, ref_string ):
     for val in ref_string:
         print 'Current page table:'
         print page_table
+
+        # increment the time
+        insert_time = insert_time + 1
 
         # initalize the fault flag to true
         fault_flag = True
@@ -537,21 +564,30 @@ def draw_pr_lfu( num_frames, num_refs, ref_string ):
                 # start it at 1
                 page_freq[i] = 1
                 fault_flag = False
+                # set the timestamp for it
+                page_insert_time[i] = insert_time
                 break
 
         # if there is a page fault, replace the value with the least frequency
         if fault_flag == True:
             min_freq = num_refs * 2
             min_index = -1
+            # used for FIFO within the algorithm
+            min_insert_time = num_refs * 2
             for i in range( 0, num_frames, 1 ):
+                # if it's least frequently used
                 if page_freq[i] < min_freq:
-                    min_freq = page_freq[i]
-                    min_index = i
+                    # but it's also the first of the least frequently used
+                    if page_insert_time[i] < min_insert_time:
+                        min_freq = page_freq[i]
+                        min_index = i
+                        min_insert_time = page_insert_time[i]
 
             # replace it
             page_freq[min_index] = 1
             page_table[min_index] = val
-            
+            page_insert_time[min_index] = insert_time
+
         # print the current page table to the display
         # print the ref val on the top
         cantext = pr_canvas.create_text( x_pos, y_pos[0], text = str( val ) )
