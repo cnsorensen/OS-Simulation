@@ -621,10 +621,10 @@ def draw_pr_nru( num_frames, num_refs, ref_string ):
     for i in range( 0, num_frames, 1 ):
         page_table[i] = -1
 
-    # Holds the freqency of the number of time the page has been used
-    page_freq = {}
+    # Holds the time of the number for how long it's been since used
+    page_time = {}
     for i in range( 0, num_frames, 1 ):
-        page_freq[i] = -1
+        page_time[i] = -1
 
     # the x position for the text
     x_pos = 1 * width + width / 2
@@ -642,29 +642,35 @@ def draw_pr_nru( num_frames, num_refs, ref_string ):
             # if the value is already there, continue
             if page_table[i] == val:
                 fault_flag = False
-                # reset the timer
-                page_freq[i] = page_freq[i] + 1
+                # reset the time (it'll be incremented soon)
+                page_time[i] = 0
                 break
             # if there is an empty spot, insert and continue
             elif page_table[i] == -1:
                 page_table[i] = val
-                # start it at 1
-                page_freq[i] = 1
+                # start it at 0 (it'll be incremented soon)
+                page_time[i] = 0
                 fault_flag = False
                 break
 
-        # if there is a page fault, replace the value with the least frequency
+        # increment all of the times
+        for i in range( 0, num_frames, 1 ):
+            page_time[i] = page_time[i] + 1
+
+
+        # if there is a page fault, replace the value that hasn't been used
+        # the longest
         if fault_flag == True:
-            min_freq = num_refs * 2
-            min_index = -1
+            max_time = -1
+            max_index = -1
             for i in range( 0, num_frames, 1 ):
-                if page_freq[i] < min_freq:
-                    min_freq = page_freq[i]
-                    min_index = i
+                if page_time[i] > max_time:
+                    max_time = page_time[i]
+                    max_index = i
 
             # replace it
-            page_freq[min_index] = 1
-            page_table[min_index] = val
+            page_time[max_index] = 1
+            page_table[max_index] = val
             
         # print the current page table to the display
         # print the ref val on the top
