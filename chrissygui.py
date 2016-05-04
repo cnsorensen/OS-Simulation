@@ -118,6 +118,7 @@ def draw_pr_fifo( num_frames, num_refs, ref_string ):
 
         # initalize the fault flag to true
         fault_flag = True
+        insert_flag = False
 
         # go through the page table and look for insert or match
         for i in range( 0, num_frames, 1 ):
@@ -131,6 +132,7 @@ def draw_pr_fifo( num_frames, num_refs, ref_string ):
                 # start it at 0, it will be incremented to 1 soon
                 page_time[i] = 0
                 fault_flag = False
+                insert_flag = True
                 break
 
         # increment the time of all of the values in the page table
@@ -161,7 +163,7 @@ def draw_pr_fifo( num_frames, num_refs, ref_string ):
                 cantext = pr_canvas.create_text( x_pos, y_pos[fuck+1], text = str( page_table[fuck] ) )
         
         # if there was a page fault, write it at the bottom of the page table
-        if fault_flag == True:
+        if fault_flag == True or insert_flag == True:
             cantext = pr_canvas.create_text( x_pos, y_pos[len( page_table ) + 1], text ="PF" )
 
         # increment the x position
@@ -241,6 +243,7 @@ def draw_pr_optimal( num_frames, num_refs, ref_string ):
 
         # initalize the fault flag to true
         fault_flag = True
+        insert_flag = False
 
         # go through the page table and look for insert or match
         for i in range( 0, num_frames, 1 ):
@@ -256,6 +259,7 @@ def draw_pr_optimal( num_frames, num_refs, ref_string ):
                 # start it at 0, it will be incremented to 1 soon
                 page_dist[i] = dist_refs[val]
                 fault_flag = False
+                insert_flag = True
                 break
 
         # decrement the distance of all of the values in the page table
@@ -289,7 +293,7 @@ def draw_pr_optimal( num_frames, num_refs, ref_string ):
                 cantext = pr_canvas.create_text( x_pos, y_pos[fuck+1], text = str( page_table[fuck] ) )
         
         # if there was a page fault, write it at the bottom of the page table
-        if fault_flag == True:
+        if fault_flag == True or insert_flag == True:
             cantext = pr_canvas.create_text( x_pos, y_pos[len( page_table ) + 1], text ="PF" )
 
         # increment the x position
@@ -412,6 +416,7 @@ def draw_pr_lru( num_frames, num_refs, ref_string ):
 
         # initalize the fault flag to true
         fault_flag = True
+        insert_flag = False
 
         # go through the page table and look for insert or match
         for i in range( 0, num_frames, 1 ):
@@ -427,6 +432,7 @@ def draw_pr_lru( num_frames, num_refs, ref_string ):
                 # start it at 0, it will be incremented to 1 soon
                 page_time[i] = 0
                 fault_flag = False
+                insert_flag = True
                 # set the time that it was inserted
                 page_insert_time[i] = insert_time
                 break
@@ -465,7 +471,7 @@ def draw_pr_lru( num_frames, num_refs, ref_string ):
                 cantext = pr_canvas.create_text( x_pos, y_pos[fuck+1], text = str( page_table[fuck] ) )
         
         # if there was a page fault, write it at the bottom of the page table
-        if fault_flag == True:
+        if fault_flag == True or insert_flag == True:
             cantext = pr_canvas.create_text( x_pos, y_pos[len( page_table ) + 1], text ="PF" )
 
         # increment the x position
@@ -549,6 +555,7 @@ def draw_pr_lfu( num_frames, num_refs, ref_string ):
 
         # initalize the fault flag to true
         fault_flag = True
+        insert_flag = False
 
         # go through the page table and look for insert or match
         for i in range( 0, num_frames, 1 ):
@@ -564,6 +571,7 @@ def draw_pr_lfu( num_frames, num_refs, ref_string ):
                 # start it at 1
                 page_freq[i] = 1
                 fault_flag = False
+                insert_flag =True
                 # set the timestamp for it
                 page_insert_time[i] = insert_time
                 break
@@ -596,7 +604,7 @@ def draw_pr_lfu( num_frames, num_refs, ref_string ):
                 cantext = pr_canvas.create_text( x_pos, y_pos[fuck+1], text = str( page_table[fuck] ) )
         
         # if there was a page fault, write it at the bottom of the page table
-        if fault_flag == True:
+        if fault_flag == True or insert_flag == True:
             cantext = pr_canvas.create_text( x_pos, y_pos[len( page_table ) + 1], text ="PF" )
 
         # increment the x position
@@ -672,6 +680,7 @@ def draw_pr_nru( num_frames, num_refs, ref_string ):
 
         # initalize the fault flag to true
         fault_flag = True
+        insert_flag = False
 
         # go through the page table and look for insert or match
         for i in range( 0, num_frames, 1 ):
@@ -687,6 +696,7 @@ def draw_pr_nru( num_frames, num_refs, ref_string ):
                 # start it at 0 (it'll be incremented soon)
                 page_time[i] = 0
                 fault_flag = False
+                insert_flag = True
                 break
 
         # increment all of the times
@@ -716,7 +726,7 @@ def draw_pr_nru( num_frames, num_refs, ref_string ):
                 cantext = pr_canvas.create_text( x_pos, y_pos[fuck+1], text = str( page_table[fuck] ) )
         
         # if there was a page fault, write it at the bottom of the page table
-        if fault_flag == True:
+        if fault_flag == True or insert_flag == True:
             cantext = pr_canvas.create_text( x_pos, y_pos[len( page_table ) + 1], text ="PF" )
 
         # increment the x position
