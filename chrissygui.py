@@ -7,10 +7,146 @@ from PIL import Image, ImageTk
 def test():
     print 'Hello mother fucking world!!!'
 
-def mm_generate( mem_size ):
-    table_size = mem_size / 2
-    tlb_size = table_size * 2 // 3
-    print 'Sizes: ' + str(mem_size) + ' ' + str(table_size) + ' ' + str(tlb_size)
+def mm_generate( mem_size, tlb_size ):
+    print 'Sizes: ' + str(mem_size) + ' ' + str(tlb_size)
+    
+    #cantext = pr_canvas.create_text( x_pos, y_pos[len( page_table ) + 1], text ="PF" )
+    
+    # times to get to memory from TLB or page table, time to get to page table
+    # from tlb, and time from CPU to TLB
+    mem_time = 100
+    tlb_time = 20
+    pagetable_time = 100
+
+    # create the tlb
+    tlb = {}
+    for i in range( 0, tlb_size, 1 ):
+        tlb[i] = -1
+    # create the fifo count for it
+    tlb_fifo = {}
+    for i in range( 0, tlb_size, 1 ):
+        tlb_fifo[i] = -1    
+
+    # the number of accesses to be performed
+    accesses = 20
+
+    # positions of the texts
+    # height of screen = 900, 7 = number of text lines
+    x_pos = {}
+    x_incr = 900 / 7
+    x_mark = x_incr
+    for i in range( 0, 7, 1 ):
+        x_pos[i] = x_mark
+        x_mark = x_mark + x_incr
+    # width of screen = 500,
+    y_pos = {}
+    y_incr = 500 / 7
+    y_mark = y_incr
+    for i in range( 0, accesses, 1 ):
+        y_pos[i] = y_mark
+        y_mark = y_mark + y_incr
+
+    # initialize the EAT
+    num_hit = 0
+    num_miss = 0
+    num_access = 0
+    hit_ratio = 0
+    miss_ratio = 0
+    eat = 0
+
+    # text outputs
+    hit_str = "TLB hit."
+    miss_str = "TLB miss."
+    go_tlb = "Going to TLB."
+    go_pt = "Going to page table."
+    go_pm = "Going to physical memory."
+    
+    # run the number of accesses
+    for i in range( 0, accesses, 1 ):
+        # flag for if in tlb
+        found_flag = False
+
+        # flag for if it's inserted
+        insert_flag = False
+
+        # the y position where the text should be
+        y_mark = 0
+
+        # increase number of accesses
+        num_access = num_access + 1
+
+        # pick a page
+        p = random.randint( 0, mem_size - 1 )
+        p_str = "Accessing page " + str( p )
+        # print that you're accessing a page
+        cantext = mm_canvas.create_text( x_pos[i], y_pos[y_mark], text = p_str )
+        y_mark = y_mark + 1
+
+        # search the TLB for p
+        for page in tlb:
+            if tlb[page] == p:
+                found_flag = True
+                break
+
+        # p was found in the TLB
+        if found_flag == True:
+            # print the tlb hit
+            cantext = mm_canvas.create_text( x_pos[i], y_pos[y_mark], text = hit_str )
+            y_mark = y_mark + 1
+            # increment the number of hits
+            num_hit = num_hit + 1
+            
+        else:
+            # print the tlb miss
+            cantext = mm_canvas.create_text( x_pos[i], y_pos[y_mark], text = miss_str )
+            y_mark = y_mark + 1
+            # increment the number of misses
+            num_miss = num_miss + 1
+            # print that you're going to the page table
+            cantext = mm_canvas.create_text( x_pos[i], y_pos[y_mark], text = go_pt )
+            y_mark = y_mark + 1
+            # print that you're going to physical memory
+            cantext = mm_canvas.create_text( x_pos[i], y_pos[y_mark], text = go_pm )
+            y_mark = y_mark + 1
+            # add p to the tlb
+            # print that you're inserting p to the tlb
+            insert_str = "Inserting " + str( p ) + " into TLB."
+            cantext = mm_canvas.create_text( x_pos[i], y_pos[y_mark], text = insert_str )
+            y_mark = y_mark + 1
+            for i in range( 0, tlb_size, 1 ):
+                # find an empty spot first
+                if tlb[i]== -1:
+                    # insert it
+                    tlb[i] = p
+                    tlb_fifo[i] = 0
+                    insert_flag = True
+                    break                    
+            # if there wasn't an empty spot to insert, do the fifo replace
+            if insert_flag == False:
+                max_time = -1
+                max_index = -1
+                # find the oldest one there
+                for i in range( 0, tlb_size, 1 ):
+                    if tlb_fifo[i] > max_time:
+                        max_time = tlb_fifo[i]
+                        max_index = i
+                # insert it
+                tlb_fifo[max_index] = 0
+                tlb[max_index] = p
+
+        # increment on the times in the tlb
+        for i in range( 0, tlb_size, 1 ):
+            tlb_fifo[i] = tlb_fifo[i] + 1
+
+        # calculate the eat
+        hit_ratio = num_hit / num_access
+        miss_ratio = num_miss / num_access
+        eat = ( hit_ratio * ( tlb_time + mem_time ) ) + ( miss_ratio * ( tlb_time + pagetable_time + mem_time ) )
+
+        # print eat
+        eat_str = "EAT = " + str( eat )
+        cantext = mm_canvas.create_text( x_pos[i], y_pos[y_mark], text = eat_str )
+
 
 def pr_generate( pr_alg, num_frames, num_refs ):
     print 'Page Replacement'
@@ -72,7 +208,7 @@ def draw_pr_fifo( num_frames, num_refs, ref_string ):
 
     # create the outside of the entire page table
     for ref in range( 0, num_refs, 1 ):
-        canbox = pr_canvas.create_rectangle( x1_1 * width, width, x1_2 * width, 
+        can_box = pr_canvas.create_rectangle( x1_1 * width, width, x1_2 * width, 
                 num_frames * width + width )
 
         # set the variables to draw the inner pages
@@ -803,18 +939,27 @@ def frame1():
 def frame2():
     top = Frame( two )
     top.pack( side = TOP )
+    top2 = Frame( two )
+    top2.pack( side = TOP )
     middle = Frame( two )
     middle.pack( side = TOP )
 
     # Values for the radio buttons
     mem_sizes = [
+        ( "10", 10 ),
         ( "15", 15 ),
-        ( "20", 20 ),
-        ( "25", 25 ),
-        ( "30", 30 )
+        ( "20", 20 )
     ]
 
-    # label for the page replacement algorithm selection
+    tlb_sizes = [
+        ( "5", 5 ),
+        ( "6", 6 ),
+        ( "7", 7 ),
+        ( "8", 8 ),
+        ( "9", 9 ),
+    ]
+
+    # label for the number of frames in memory
     mem_size_L = Label( top, text = 'Number of frames in memory:' )
     mem_size_L.pack()
 
@@ -824,9 +969,23 @@ def frame2():
     mem_size.set("15")
     # add each button to the display
     for text, mode in mem_sizes:
-        mem_size__b = Radiobutton( top, text = text, variable = mem_size, value = mode )
-        mem_size__b.pack( side = LEFT )
+        mem_size_b = Radiobutton( top, text = text, variable = mem_size, value = mode )
+        mem_size_b.pack( side = LEFT )
     
+    # label for the size of TLB
+    tlb_size_L = Label( top2, text = 'Size of TLB:' )
+    tlb_size_L.pack()
+
+    # radio buttons to select the size of memory
+    tlb_size = IntVar()
+    # initalize it
+    tlb_size.set("5")
+    # add each button to the display
+    for text, mode in tlb_sizes:
+        tlb_size_b = Radiobutton( top2, text = text, variable = tlb_size, value = mode )
+        tlb_size_b.pack( side = LEFT )
+
+
     # the image of the paging hardware in the window
     image = Image.open( "paginghardware.jpg" )
     image = image.resize( (100, 100 ), Image.ANTIALIAS )
@@ -837,10 +996,14 @@ def frame2():
 
     # generate button to submit for memory management
     mm_generate_b = Button( two, text = "Generate",
-        command = lambda: mm_generate( mem_size.get()) )
+        command = lambda: mm_generate( mem_size.get(), tlb_size.get() ) )
     mm_generate_b.pack()
 
+    # canvas to write the text
+    mm_canvas = Canvas( two, width = 500, height = 500 )
+    mm_canvas.pack()
 
+    return mm_generate_b, mm_canvas
 
 # Page Replacement tab
 # FIFO, Optimal, LRU, LFU, NRU
@@ -941,7 +1104,7 @@ if __name__ == "__main__":
 
     root,one,two,three = gui()
     frame1()
-    frame2()
+    mm_generate_b, mm_canvas = frame2()
     pr_generate_b, pr_canvas = frame3()
 
     root.mainloop()
