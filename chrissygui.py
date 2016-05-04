@@ -2,9 +2,15 @@ from Tkinter import *
 from ttk import *
 import random
 import time
+from PIL import Image, ImageTk
 
 def test():
     print 'Hello mother fucking world!!!'
+
+def mm_generate( mem_size ):
+    table_size = mem_size / 2
+    tlb_size = table_size * 2 // 3
+    print 'Sizes: ' + str(mem_size) + ' ' + str(table_size) + ' ' + str(tlb_size)
 
 def pr_generate( pr_alg, num_frames, num_refs ):
     print 'Page Replacement'
@@ -795,11 +801,46 @@ def frame1():
 
 # Memory Management Unit tab
 def frame2():
-    b = Button( two, text="Draw", command = line )
-    b.pack()
-    can = Canvas( two, width = 300, height = 300 )
-    can.pack()
-    return b, can
+    top = Frame( two )
+    top.pack( side = TOP )
+    middle = Frame( two )
+    middle.pack( side = TOP )
+
+    # Values for the radio buttons
+    mem_sizes = [
+        ( "15", 15 ),
+        ( "20", 20 ),
+        ( "25", 25 ),
+        ( "30", 30 )
+    ]
+
+    # label for the page replacement algorithm selection
+    mem_size_L = Label( top, text = 'Number of frames in memory:' )
+    mem_size_L.pack()
+
+    # radio buttons to select the size of memory
+    mem_size = IntVar()
+    # initalize it
+    mem_size.set("15")
+    # add each button to the display
+    for text, mode in mem_sizes:
+        mem_size__b = Radiobutton( top, text = text, variable = mem_size, value = mode )
+        mem_size__b.pack( side = LEFT )
+    
+    # the image of the paging hardware in the window
+    image = Image.open( "paginghardware.jpg" )
+    image = image.resize( (100, 100 ), Image.ANTIALIAS )
+    photo = ImageTk.PhotoImage( image )
+    photo_L = Label( middle, image = photo )
+    photo_L.image = photo
+    photo_L.pack()
+
+    # generate button to submit for memory management
+    mm_generate_b = Button( two, text = "Generate",
+        command = lambda: mm_generate( mem_size.get()) )
+    mm_generate_b.pack()
+
+
 
 # Page Replacement tab
 # FIFO, Optimal, LRU, LFU, NRU
@@ -813,13 +854,6 @@ def frame3():
     middle.pack( side = TOP )
     bottom = Frame( three )
     bottom.pack( side = TOP )
-
-    ##OLD
-    cmds = Frame( three )
-    cmds.pack( side = TOP )
-    string1 = ""
-    string2 = ""
-    ##
 
     # Values for the radio buttons
     pr_algorithms = [
@@ -907,7 +941,7 @@ if __name__ == "__main__":
 
     root,one,two,three = gui()
     frame1()
-    bcan, can = frame2()
+    frame2()
     pr_generate_b, pr_canvas = frame3()
 
     root.mainloop()
