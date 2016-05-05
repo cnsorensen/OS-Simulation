@@ -1,3 +1,4 @@
+from operator import *
 from Tkinter import *
 from ttk import *
 import random
@@ -860,44 +861,38 @@ def frame1():
     sc_canvas = Text( one, width = 75, height = 50 )
     sc_canvas.pack(side=RIGHT)
 
+
     processList = []
     selection = IntVar()
-    priority = StringVar()
     timeslice = StringVar()
-    process = StringVar()
-    arrival = StringVar()
-    burst = StringVar()
+   
     
     def gantt(): 
         summ = 0
         ganttchart = ""  
-        
+        remainingTime = []
 
         if selection.get() == 3:  # shortest job first
             for i in processList:
-                remainingTime.append(int(i[2]))
+                remainingTime.append(i[2])
             print remainingTime
             for i in sorted(sorted(processList, key=itemgetter(1)), key=itemgetter(2)):
-                for j in range(0, int(i[2])):
-                    ganttchart += "| " + i[0] + " "
+                for j in range(0, i[2]):
+                    ganttchart += "| " + str(i[0]) + " "
 
 
         if selection.get() == 2: # priority scheduling
             for i in sorted(processList, key=itemgetter(3)):
-                for j in range (0, int(i[2])):
-                    ganttchart += "| " + i[0] + " "
+                for j in range (0, i[2]):
+                    ganttchart += "| " + str(i[0]) + " "
 
         if selection.get() == 1: # round robin
             totalslices = 0
-            remainingTime = []
             for i in processList:
-                totalslices += int(i[2])
-            totalslices /= int(processList[0][4])
-            for i in processList:
-                if int(i[2]) > 0:
-                    for j in range (0, int(processList[0][4])):
-                        ganttchart += "| " + i[0] + " "
-                    next = int(i[2]) - 2
+                if i[2] > 0:
+                    for j in range (0, int(timeslicefield.get())):
+                        ganttchart += "| " + str(i[0]) + " "
+                    next = i[2] - 2
                     if next < 0:
                         next = 0
                     processList.append(list((i[0], "fill", next)))
@@ -907,34 +902,25 @@ def frame1():
 
 
     def add():
-        t.insert(END,  processid.get() + "\t|\t" + arrivTime.get() + "\t|\t" + burstTime.get() + "\n")
-        processList.append(list((processid.get(), arrivTime.get(), burstTime.get(), priority.get(), timeslice.get())))
+        processid = len(processList)
+        arrival = random.randint(0, 4)
+        burst = random.randint(1, 10)
+        priority = random.randint(1, 5)
+        
+        t.insert(END,  str(processid) + " | " + str(arrival) + " | " + str(burst) + " | " + str(priority) + "\n")
+        processList.append(list((processid, arrival, burst,  priority)))
+
+    timeslicefield = Entry(left, textvariable = timeslice)
+    timesliceLabel = Label(left, text="Time Slice").pack(anchor=NW)
+    timeslicefield.pack(anchor = NW)
 
     b = Button(left, text="Add Process", width=10, command=add)
     g = Button(top, text="Produce Gantt Chart", width=10, command=gantt)
-    
-    priorityfield = Entry(left, textvariable = priority)
-    timequanta = Entry(left, textvariable = timeslice)
-    processid = Entry(left, textvariable = process)
-    arrivTime = Entry(left, textvariable = arrival)
-    burstTime = Entry(left, textvariable = burst)
-
+    b.pack()
     Radiobutton(top, text = "Round Robin", variable = selection, value = 1).pack(side=LEFT)
     Radiobutton(top, text = "Priority", variable = selection, value = 2).pack(side=LEFT)
     Radiobutton(top, text = "SJF", variable = selection, value = 3).pack(side=LEFT)
     g.pack(anchor=SE)
-
-    priorityLabel = Label(left, text="Priority (only for priority scheduling)").pack(anchor=NW)
-    priorityfield.pack(anchor = NW)
-    timeLabel = Label(left, text="Time slice (only for round robin)").pack(anchor=NW)
-    timequanta.pack(anchor = NW)
-    processLabel = Label(left, text="Process ID").pack(anchor=NW)
-    processid.pack(anchor = NW)
-    arrivalLabel = Label(left, text="Arrival Time").pack(anchor=W)
-    arrivTime.pack(anchor = W)
-    burstLabel = Label(left, text="Burst Time").pack(anchor=SW)
-    burstTime.pack(anchor = SW)
-    b.pack()
 
     t = Text(left, height = 20, width = 45)
     t.pack()
