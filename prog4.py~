@@ -919,18 +919,98 @@ def gui():
 
     return root, one, two, three
 
+############################ FRAME ! ###########################
 # Process Scheduler tab
-def frame1():   
-    L = Label( one, text = 'Im a labelly label' )
-    L.pack()
-    b = Button( one, text = "OK", command = exit )
+def frame1(frame):	
+    top = Frame(one)
+    left = Frame(one)
+    left.pack(side=LEFT)
+    top.pack(side=TOP)
+
+    sc_canvas = Text( one, width = 75, height = 50 )
+    sc_canvas.pack(side=RIGHT)
+
+    processList = []
+    selection = IntVar()
+    priority = StringVar()
+    timeslice = StringVar()
+    process = StringVar()
+    arrival = StringVar()
+    burst = StringVar()
+    
+    def gantt(): 
+        summ = 0
+        ganttchart = ""  
+        
+
+        if selection.get() == 3:  # shortest job first
+            for i in processList:
+                remainingTime.append(int(i[2]))
+            print remainingTime
+            for i in sorted(sorted(processList, key=itemgetter(1)), key=itemgetter(2)):
+                for j in range(0, int(i[2])):
+                    ganttchart += "| " + i[0] + " "
+
+
+        if selection.get() == 2: # priority scheduling
+            for i in sorted(processList, key=itemgetter(3)):
+                for j in range (0, int(i[2])):
+                    ganttchart += "| " + i[0] + " "
+
+        if selection.get() == 1: # round robin
+            totalslices = 0
+            remainingTime = []
+            for i in processList:
+                totalslices += int(i[2])
+            totalslices /= int(processList[0][4])
+            for i in processList:
+                if int(i[2]) > 0:
+                    for j in range (0, int(processList[0][4])):
+                        ganttchart += "| " + i[0] + " "
+                    next = int(i[2]) - 2
+                    if next < 0:
+                        next = 0
+                    processList.append(list((i[0], "fill", next)))
+
+        ganttchart += "\n\n\n"
+        sc_canvas.insert(END, ganttchart)
+
+
+    def add():
+        t.insert(END,  processid.get() + "\t|\t" + arrivTime.get() + "\t|\t" + burstTime.get() + "\n")
+        processList.append(list((processid.get(), arrivTime.get(), burstTime.get(), priority.get(), timeslice.get())))
+
+    b = Button(left, text="Add Process", width=10, command=add)
+    g = Button(top, text="Produce Gantt Chart", width=10, command=gantt)
+    
+    priorityfield = Entry(left, textvariable = priority)
+    timequanta = Entry(left, textvariable = timeslice)
+    processid = Entry(left, textvariable = process)
+    arrivTime = Entry(left, textvariable = arrival)
+    burstTime = Entry(left, textvariable = burst)
+
+    Radiobutton(top, text = "Round Robin", variable = selection, value = 1).pack(side=LEFT)
+    Radiobutton(top, text = "Priority", variable = selection, value = 2).pack(side=LEFT)
+    Radiobutton(top, text = "SJF", variable = selection, value = 3).pack(side=LEFT)
+    g.pack(anchor=SE)
+
+    priorityLabel = Label(left, text="Priority (only for priority scheduling)").pack(anchor=NW)
+    priorityfield.pack(anchor = NW)
+    timeLabel = Label(left, text="Time slice (only for round robin)").pack(anchor=NW)
+    timequanta.pack(anchor = NW)
+    processLabel = Label(left, text="Process ID").pack(anchor=NW)
+    processid.pack(anchor = NW)
+    arrivalLabel = Label(left, text="Arrival Time").pack(anchor=W)
+    arrivTime.pack(anchor = W)
+    burstLabel = Label(left, text="Burst Time").pack(anchor=SW)
+    burstTime.pack(anchor = SW)
     b.pack()
-    add_b = Button( one, text = "Add", command = test )
-    add_b.pack()
-    clear_b = Button( one, text = "Clear", command = test )
-    clear_b.pack()
-    generate_b = Button( one, text = "Generate", command = test )
-    generate_b.pack()
+
+    t = Text(left, height = 20, width = 45)
+    t.pack()
+
+    t.insert(END, "Process ID \t|\tArrival Time\t|\tBurst Time\n")
+    ##Add radio buttons to select a scheduler type
 
 # Memory Management Unit tab
 def frame2():
@@ -1002,6 +1082,7 @@ def frame2():
 
     return mm_generate_b, mm_canvas
 
+############################### FRAME 3 ###########################################
 # Page Replacement tab
 # FIFO, Optimal, LRU, LFU, NRU
 # Use Auto-generated reference strings
