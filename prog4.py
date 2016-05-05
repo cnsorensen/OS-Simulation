@@ -4,18 +4,19 @@ import random
 import time
 from PIL import Image, ImageTk
 
-def test():
-    print 'Hello mother fucking world!!!'
-
 ################################# MEMORY MANAGEMENT ################################
-def mm_generate( mem_size, tlb_size ):
-    print 'Memory Management'
+def mm_generate( mem_size, tlb_size, accesses ):
 
     # times to get to memory from TLB or page table, time to get to page table
     # from tlb, and time from CPU to TLB
     mem_time = 100
     tlb_time = 20
     pagetable_time = 100
+
+    # print these times to the screen
+    mm_canvas.insert( END, 'Time to TLB from CPU: ' + str( tlb_time ) + ' ns\n' )
+    mm_canvas.insert( END, 'Time to Page Table from CPU: ' + str( pagetable_time ) + ' ns\n' )
+    mm_canvas.insert( END, 'Time to Memory from TLB or Page Table: ' + str( mem_time ) + ' ns\n\n' )
 
     # create the tlb
     tlb = {}
@@ -25,36 +26,6 @@ def mm_generate( mem_size, tlb_size ):
     tlb_fifo = {}
     for i in range( 0, tlb_size, 1 ):
         tlb_fifo[i] = -1    
-
-    # the number of accesses to be performed
-    accesses = 20
-
-    # positions of the texts
-    # Length of the screen = 500, 7 = number of text lines
-    x_pos = {}
-    x_incr = 500 / accesses
-    #print 'x_incr ' + str( x_incr )
-    x_mark = x_incr
-    x_pos[0] = 5
-    for i in range( 1, accesses, 1 ):
-        x_pos[i] = x_mark
-        x_mark = x_mark + x_incr
-    
-    #print 'x pos:'
-    #print x_pos
-
-    # width of screen = 500,
-    y_pos = {}
-    y_incr = 40
-    #print 'y_incr ' + str( y_incr )
-    y_mark = y_incr
-    y_pos[0] = 5
-    for i in range( 1, 7, 1 ):
-        y_pos[i] = y_mark
-        y_mark = y_mark + y_incr
-
-    #print 'y_pos:'
-    #print y_pos
 
     # initialize the EAT
     num_hit = 0
@@ -69,7 +40,7 @@ def mm_generate( mem_size, tlb_size ):
     miss_str = "TLB miss."
     go_tlb = "Going to TLB."
     go_pt = "Going to page table."
-    go_pm = "Going to physical memory."
+    go_pm = "Going to memory."
     
     # run the number of accesses
     for i in range( 0, accesses, 1 ):
@@ -79,9 +50,6 @@ def mm_generate( mem_size, tlb_size ):
         # flag for if it's inserted
         insert_flag = False
 
-        # the y position where the text should be
-        y_mark = 0
-
         # increase number of accesses
         num_access = num_access + 1
 
@@ -89,10 +57,8 @@ def mm_generate( mem_size, tlb_size ):
         p = random.randint( 0, mem_size - 1 )
         p_str = "Accessing page " + str( p )
         # print that you're accessing a page
-        mm_canvas.insert( END, p_str + '\n')
+        #mm_canvas.insert( END, p_str + '\n')
         print p_str   
-
-        y_mark = y_mark + 1
 
         # search the TLB for p
         for page in tlb:
@@ -103,7 +69,7 @@ def mm_generate( mem_size, tlb_size ):
         # p was found in the TLB
         if found_flag == True:
             # print the tlb hit
-            mm_canvas.insert( END, hit_str + '\n')
+            #mm_canvas.insert( END, hit_str + '\n')
             print hit_str
 
             # increment the number of hits
@@ -111,24 +77,24 @@ def mm_generate( mem_size, tlb_size ):
 
         else:
             # print the tlb miss
-            mm_canvas.insert( END, miss_str )
+            #mm_canvas.insert( END, miss_str )
             print miss_str
 
             # increment the number of misses
             num_miss = num_miss + 1
 
             # print that you're going to the page table
-            mm_canvas.insert( END, go_pt )
+            #mm_canvas.insert( END, go_pt )
             print go_pt
 
             # print that you're going to physical memory
-            mm_canvas.insert( END, go_pm + '\n' )
+            #mm_canvas.insert( END, go_pm )
             print go_pm
 
             # add p to the tlb
             # print that you're inserting p to the tlb
             insert_str = "Inserting " + str( p ) + " into TLB."
-            mm_canvas.insert( END, insert_str + '\n')
+            #mm_canvas.insert( END, insert_str + '\n')
             print insert_str
 
             for i in range( 0, tlb_size, 1 ):
@@ -160,16 +126,21 @@ def mm_generate( mem_size, tlb_size ):
         hit_ratio = float( num_hit ) / float( num_access )
         miss_ratio = float( num_miss ) / float( num_access )
         eat = ( hit_ratio * ( tlb_time + mem_time ) ) + ( miss_ratio * ( tlb_time + pagetable_time + mem_time ) )
-        print 'Hit ratio: ' + str( hit_ratio )
-        print 'Miss ratio: ' + str( miss_ratio )
-        print 'Num hit: ' + str( num_hit )
-        print 'Num miss: ' + str( num_miss )
-        print 'Num access: ' + str( num_access )
 
         # print eat
         eat_str = "EAT = " + str( eat ) + " ns\n"
-        mm_canvas.insert( END, eat_str )
+        #mm_canvas.insert( END, eat_str )
         print eat_str
+    
+    print 'Total TLB Hits: ' + str( num_hit )
+    print 'Total TLB Misses: ' + str( num_miss )
+    print 'Total accesses: ' + str( num_access )
+    print 'Final EAT: ' + str( eat ) + 'ns'
+
+    mm_canvas.insert( END, 'Total TLB Hits: ' + str( num_hit ) + '\n' )
+    mm_canvas.insert( END, 'Total TLB Misses: ' + str( num_miss ) + '\n' )
+    mm_canvas.insert( END, 'Total accesses: ' + str( num_access ) + '\n' )
+    mm_canvas.insert( END, 'Final EAT: ' + str( eat ) + ' ns\n\n' )
 
 ############################ PAGE REPLACEMENT #######################################
 def pr_generate( pr_alg, num_frames, num_refs ):
@@ -217,7 +188,6 @@ def generate_ref_string( range_min, range_max, num ):
 
 ################################### FIFO #############################################
 def draw_pr_fifo( num_frames, num_refs, ref_string ):
-    print "Drawing fifo"
 
     ## draw the pages out first ##
 
@@ -279,8 +249,6 @@ def draw_pr_fifo( num_frames, num_refs, ref_string ):
 
     # go through the ref string
     for val in ref_string:
-        print 'Current page table:'
-        print page_table
 
         # initalize the fault flag to true
         fault_flag = True
@@ -337,7 +305,6 @@ def draw_pr_fifo( num_frames, num_refs, ref_string ):
 
 ################################ OPTIMAL #############################################
 def draw_pr_optimal( num_frames, num_refs, ref_string ):
-    print "Drawing optimal"
 
     ## draw the pages out first ##
 
@@ -404,8 +371,6 @@ def draw_pr_optimal( num_frames, num_refs, ref_string ):
 
     # go through the ref string
     for val in range( 0, num_refs, 1):
-        print 'Current page table:'
-        print page_table
 
         # initalize the fault flag to true
         fault_flag = True
@@ -505,7 +470,6 @@ def get_distances( num_refs, refs_string ):
 
 ####################################### LRU ##########################################
 def draw_pr_lru( num_frames, num_refs, ref_string ):
-    print "Drawing LRU"
 
     ## draw the pages out first ##
 
@@ -567,8 +531,6 @@ def draw_pr_lru( num_frames, num_refs, ref_string ):
 
     # go through the ref string
     for val in ref_string:
-        print 'Current page table:'
-        print page_table
 
         # initalize the fault flag to true
         fault_flag = True
@@ -627,7 +589,6 @@ def draw_pr_lru( num_frames, num_refs, ref_string ):
 
 ####################################### LFU ##########################################
 def draw_pr_lfu( num_frames, num_refs, ref_string ):
-    print "Drawing LFU"
 
     ## draw the pages out first ##
 
@@ -689,8 +650,6 @@ def draw_pr_lfu( num_frames, num_refs, ref_string ):
 
     # go through the ref string
     for val in ref_string:
-        print 'Current page table:'
-        print page_table
 
         # initalize the fault flag to true
         fault_flag = True
@@ -746,7 +705,6 @@ def draw_pr_lfu( num_frames, num_refs, ref_string ):
 
 ####################################### NRU ##########################################
 def draw_pr_nru( num_frames, num_refs, ref_string ):
-    print "Drawing NRU"
 
     ## draw the pages out first ##
 
@@ -808,8 +766,6 @@ def draw_pr_nru( num_frames, num_refs, ref_string ):
 
     # go through the ref string
     for val in ref_string:
-        print 'Current page table:'
-        print page_table
 
         # initalize the fault flag to true
         fault_flag = True
@@ -865,27 +821,6 @@ def draw_pr_nru( num_frames, num_refs, ref_string ):
         # increment the x position
         x_pos = x_pos + 2 * width
 
-def printvar( var ):
-    print var[0].get()
-
-def pushvar( var ):
-    for i in range( N-1, 0, -1 ):
-        var[i].set( var[i-1].get() )
-    var[0].set( '' )
-
-# Creates a line
-def line():
-    canline = can.create_line( 0, 0, 250, 250, 53, 69, 300, 300 )
-    canbox = can.create_rectangle( ( 150, 150, 250, 250 ) )
-    bcan.config( text = "Hide", command = hide )
-
-def hide():
-    bcan.config( text = "Draw", command = line )
-    can.delete( "all" )
-
-def randvar():
-    string2[0].set( random.randint( 0, 32 ) )
-
 # Sets up the GUI
 def gui():
     # set up the window
@@ -893,7 +828,8 @@ def gui():
     # title of the window
     root.title( "Simulation Project" )
     # set the size of the window
-    root.geometry( "900x500" )
+    #root.geometry( "900x500" )
+    root.geometry( "1000x1000" )
     # set up the tab structure
     notebook = Notebook( root )
 
@@ -1012,6 +948,8 @@ def frame2():
     top.pack( side = TOP )
     top2 = Frame( two )
     top2.pack( side = TOP )
+    top3 = Frame( two )
+    top3.pack( side = TOP )
     middle = Frame( two )
     middle.pack( side = LEFT )
 
@@ -1028,6 +966,13 @@ def frame2():
         ( "7", 7 ),
         ( "8", 8 ),
         ( "9", 9 ),
+    ]
+
+    num_accesses = [
+        ( "50", 50 ),
+        ( "100", 100 ),
+        ( "150", 150 ),
+        ( "200", 200 )
     ]
 
     # label for the number of frames in memory
@@ -1056,10 +1001,23 @@ def frame2():
         tlb_size_b = Radiobutton( top2, text = text, variable = tlb_size, value = mode )
         tlb_size_b.pack( side = LEFT )
 
+    # label for the number of accesses
+    tlb_size_L = Label( top3, text = 'Number of Accesses:' )
+    tlb_size_L.pack()
+
+    # radio buttons for the number of accesses
+    num_access = IntVar()
+    # initalize it
+    num_access.set("25")
+    # add each button to the display
+    for text, mode in num_accesses:
+        num_access_b = Radiobutton( top3, text = text, variable = num_access, value = mode )
+        num_access_b.pack( side = LEFT )
+
 
     # the image of the paging hardware in the window
     image = Image.open( "paginghardware.jpg" )
-    image = image.resize( (100, 100 ), Image.ANTIALIAS )
+    image = image.resize( (350, 250 ), Image.ANTIALIAS )
     photo = ImageTk.PhotoImage( image )
     photo_L = Label( middle, image = photo )
     photo_L.image = photo
@@ -1067,7 +1025,7 @@ def frame2():
 
     # generate button to submit for memory management
     mm_generate_b = Button( two, text = "Generate",
-        command = lambda: mm_generate( mem_size.get(), tlb_size.get() ) )
+        command = lambda: mm_generate( mem_size.get(), tlb_size.get(), num_access.get() ) )
     mm_generate_b.pack()
 
     # canvas to write the text
