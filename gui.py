@@ -9,8 +9,10 @@ def test():
 
 ################################# MEMORY MANAGEMENT ################################
 def mm_generate( mem_size, tlb_size ):
-    print 'Memory Management'
-
+    print 'Sizes: ' + str(mem_size) + ' ' + str(tlb_size)
+    
+    #cantext = pr_canvas.create_text( x_pos, y_pos[len( page_table ) + 1], text ="PF" )
+    
     # times to get to memory from TLB or page table, time to get to page table
     # from tlb, and time from CPU to TLB
     mem_time = 100
@@ -27,34 +29,34 @@ def mm_generate( mem_size, tlb_size ):
         tlb_fifo[i] = -1    
 
     # the number of accesses to be performed
-    accesses = 20
+    accesses = 5
 
     # positions of the texts
     # Length of the screen = 500, 7 = number of text lines
     x_pos = {}
     x_incr = 500 / accesses
-    #print 'x_incr ' + str( x_incr )
+    print 'x_incr ' + str( x_incr )
     x_mark = x_incr
     x_pos[0] = 5
     for i in range( 1, accesses, 1 ):
         x_pos[i] = x_mark
         x_mark = x_mark + x_incr
     
-    #print 'x pos:'
-    #print x_pos
+    print 'x pos:'
+    print x_pos
 
     # width of screen = 500,
     y_pos = {}
     y_incr = 40
-    #print 'y_incr ' + str( y_incr )
+    print 'y_incr ' + str( y_incr )
     y_mark = y_incr
     y_pos[0] = 5
     for i in range( 1, 7, 1 ):
         y_pos[i] = y_mark
         y_mark = y_mark + y_incr
 
-    #print 'y_pos:'
-    #print y_pos
+    print 'y_pos:'
+    print y_pos
 
     # initialize the EAT
     num_hit = 0
@@ -89,10 +91,11 @@ def mm_generate( mem_size, tlb_size ):
         p = random.randint( 0, mem_size - 1 )
         p_str = "Accessing page " + str( p )
         # print that you're accessing a page
-        mm_canvas.insert( END, p_str + '\n')
-        print p_str   
-
+        cantext = mm_canvas.create_text( x_pos[i], y_pos[y_mark], text = p_str )
         y_mark = y_mark + 1
+
+        print 'y_mark ' + str( y_mark )
+        print 'y_pos ' + str( y_pos[y_mark] )
 
         # search the TLB for p
         for page in tlb:
@@ -103,34 +106,42 @@ def mm_generate( mem_size, tlb_size ):
         # p was found in the TLB
         if found_flag == True:
             # print the tlb hit
-            mm_canvas.insert( END, hit_str + '\n')
-            print hit_str
-
+            cantext = mm_canvas.create_text( x_pos[i], y_pos[y_mark], text = hit_str )
+            y_mark = y_mark + 1
             # increment the number of hits
             num_hit = num_hit + 1
+            
+            print "TLB HIT"
+
+            print 'y_mark ' + str( y_mark )
+            print 'y_pos ' + str( y_pos[y_mark] )
+
+
 
         else:
             # print the tlb miss
-            mm_canvas.insert( END, miss_str )
-            print miss_str
+            cantext = mm_canvas.create_text( x_pos[i], y_pos[y_mark], text = miss_str )
+            y_mark = y_mark + 1
+
+            print "TLB Miss"
+    
+       #     print 'y_mark ' + str( y_mark )
+        #    print 'y_pos ' + str( y_pos[y_mark] )
+
 
             # increment the number of misses
             num_miss = num_miss + 1
-
             # print that you're going to the page table
-            mm_canvas.insert( END, go_pt )
-            print go_pt
-
+            cantext = mm_canvas.create_text( x_pos[i], y_pos[y_mark], text = go_pt )
+            y_mark = y_mark + 1
             # print that you're going to physical memory
-            mm_canvas.insert( END, go_pm + '\n' )
-            print go_pm
-
+            cantext = mm_canvas.create_text( x_pos[i], y_pos[y_mark], text = go_pm )
+            y_mark = y_mark + 1
             # add p to the tlb
             # print that you're inserting p to the tlb
             insert_str = "Inserting " + str( p ) + " into TLB."
-            mm_canvas.insert( END, insert_str + '\n')
-            print insert_str
-
+            cantext = mm_canvas.create_text( x_pos[i], y_pos[y_mark], text = insert_str )
+            y_mark = y_mark + 1
             for i in range( 0, tlb_size, 1 ):
                 # find an empty spot first
                 if tlb[i]== -1:
@@ -157,19 +168,14 @@ def mm_generate( mem_size, tlb_size ):
             tlb_fifo[i] = tlb_fifo[i] + 1
 
         # calculate the eat
-        hit_ratio = float( num_hit ) / float( num_access )
-        miss_ratio = float( num_miss ) / float( num_access )
+        hit_ratio = num_hit / num_access
+        miss_ratio = num_miss / num_access
         eat = ( hit_ratio * ( tlb_time + mem_time ) ) + ( miss_ratio * ( tlb_time + pagetable_time + mem_time ) )
-        print 'Hit ratio: ' + str( hit_ratio )
-        print 'Miss ratio: ' + str( miss_ratio )
-        print 'Num hit: ' + str( num_hit )
-        print 'Num miss: ' + str( num_miss )
-        print 'Num access: ' + str( num_access )
 
         # print eat
-        eat_str = "EAT = " + str( eat ) + " ns\n"
-        mm_canvas.insert( END, eat_str )
-        print eat_str
+        eat_str = "EAT = " + str( eat )
+        cantext = mm_canvas.create_text( x_pos[i], y_pos[y_mark], text = eat_str )
+
 
 ############################ PAGE REPLACEMENT #######################################
 def pr_generate( pr_alg, num_frames, num_refs ):
@@ -1013,7 +1019,7 @@ def frame2():
     top2 = Frame( two )
     top2.pack( side = TOP )
     middle = Frame( two )
-    middle.pack( side = LEFT )
+    middle.pack( side = TOP )
 
     # Values for the radio buttons
     mem_sizes = [
@@ -1071,10 +1077,7 @@ def frame2():
     mm_generate_b.pack()
 
     # canvas to write the text
-    #mm_canvas = Canvas( two, width = 500, height = 500 )
-    #mm_canvas.pack()
-
-    mm_canvas = Text( two, width = 75, height= 50 )
+    mm_canvas = Canvas( two, width = 500, height = 500 )
     mm_canvas.pack()
 
     return mm_generate_b, mm_canvas
